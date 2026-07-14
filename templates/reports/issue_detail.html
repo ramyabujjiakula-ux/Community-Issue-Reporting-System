@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Issue Details</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f5f5f5;
+    margin:40px;
+}
+
+.container{
+    width:80%;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+}
+
+.reply{
+    background:#eef5ff;
+    padding:10px;
+    margin:10px 0;
+    border-left:5px solid blue;
+}
+
+textarea{
+    width:100%;
+}
+
+button{
+    padding:10px 20px;
+    background:green;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+select{
+    padding:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>{{ issue.title }}</h2>
+
+<p><b>Description:</b> {{ issue.description }}</p>
+
+<p><b>Category:</b> {{ issue.get_category_display }}</p>
+
+<p><b>Status:</b> {{ issue.get_status_display }}</p>
+
+<p><b>Submitted By:</b> {{ issue.submitted_by.username }}</p>
+
+{% if issue.photo %}
+<img src="{{ issue.photo.url }}" width="300">
+{% endif %}
+
+<hr>
+
+<h3>Replies</h3>
+
+{% for reply in issue.replies.all %}
+
+<div class="reply">
+
+<b>{{ reply.author.username }}</b>
+
+<br>
+
+{{ reply.message }}
+
+<br>
+
+<small>{{ reply.created_at }}</small>
+
+</div>
+
+{% empty %}
+
+<p>No replies yet.</p>
+
+{% endfor %}
+
+{% if request.user.is_superuser %}
+
+<hr>
+
+<h3>Update Status</h3>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<select name="status">
+
+{% for value,name in issue.STATUS_CHOICES %}
+
+<option value="{{ value }}"
+{% if issue.status == value %}
+selected
+{% endif %}
+>
+
+{{ name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<button type="submit">
+
+Update Status
+
+</button>
+
+</form>
+
+<hr>
+
+<h3>Reply to User</h3>
+
+<form method="POST">
+
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<button type="submit">
+
+Send Reply
+
+</button>
+
+</form>
+
+{% endif %}
+
+<br>
+
+<a href="{% url 'issues_by_category' issue.category %}">
+
+← Back to Category
+
+</a>
+
+</div>
+
+</body>
+
+</html>
